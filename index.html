@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>YOLOdice Roll Verifier</title>
+        <title>bustadice Roll Verifier</title>
         <link rel="stylesheet" href="styles.css">
         <script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script>
         <script src="https://unpkg.com/vue@2.4.2"></script>
@@ -9,59 +9,26 @@
     </head>
     <body>
         <div id="app">
-            <h1><a class="title-link" href="https://yolodice.com/r?2FYJC-7JZ">YOLOdice</a> Roll Verifier</h1>
+            <h1><a class="title-link" href="https://bustadice.com">bustadice</a> Roll Verifier</h1>
             <div id="input" class="center-box">
                 <h2>Input</h2>
                 <input v-model="serverSeed" type="text" placeholder="Server Seed">
                 <input v-model="serverSeedHash" type="text" placeholder="Server Seed Hash">
                 <input v-model="clientSeed" type="text" placeholder="Client Seed">
                 <input v-model="nonce" type="number" placeholder="Nonce">
-                <h3>Or</h3>
-                <p>Choose a CSV file exported from the site</p>
-                <input id="fileInput" type="file" accept=".csv" onchange="app.handleFileInput(this.files)">
             </div>
             <div id="output" class="center-box">
                 <h2>Output</h2>
                 <pre v-if="serverSeed">{{`Server Seed: ${serverSeed}`}}</pre>
-                <pre v-if="serverSeed">{{`Calculated hash of Server Seed: ${sha256(serverSeed)}`}}</pre>
+                <pre v-if="serverSeed && splitSeeds(serverSeed)">{{`Calculated hash of Server Seed: ${hashServerSeed(splitSeeds(serverSeed))}`}}</pre>
                 <pre v-if="serverSeedHash">{{`Provided hash of Server Seed: ${serverSeedHash}`}}</pre>
-                <pre v-if="serverSeed && serverSeedHash">{{`Hashes match: ${sha256(serverSeed) === serverSeedHash}`}}</pre>
+                <pre v-if="serverSeed && serverSeedHash">{{`Hashes match: ${hashServerSeed(splitSeeds(serverSeed)) === serverSeedHash}`}}</pre>
                 <pre v-if="clientSeed">{{`Client Seed: ${clientSeed}`}}</pre>
                 <pre v-if="clientSeed && nonce">{{`Nonce: ${nonce}`}}</pre>
-                <pre v-if="serverSeed && clientSeed && nonce">{{`Result of HMAC-SHA512(serverSeed, '${clientSeed}.${nonce}')`}}</pre>
-                <pre v-if="serverSeed && clientSeed && nonce" v-html="htmlTemplateHash()"></pre>
-                <pre v-if="serverSeed && clientSeed && nonce">(Pick the first 5 character set that yields a number 0 <= n <= 999999)</pre>
-                <pre v-if="serverSeed && clientSeed && nonce">{{`parseInt(${hashToRoll(hmacsha512(serverSeed, clientSeed, nonce)).chunk}, 16) = ${hashToRoll(hmacsha512(serverSeed, clientSeed, nonce)).roll}`}}</pre>
-                <h3 v-if="serverSeed && clientSeed && nonce">Roll: {{hashToRoll(hmacsha512(serverSeed, clientSeed, nonce)).roll}}</h3>
-                <h3 v-if="serverSeedHash">{{sha256(serverSeed) === serverSeedHash ? 'Server seed matches' : 'Server seed does not match'}}</h3>
-                <h3 v-if="verifiedRolls.length > 0">{{allBetsVerify() ? 'All CSV bets have been verified' : 'One or more bets does not check out'}}</h3>
-                <table v-if="verifiedRolls.length > 0">
-                    <tr>
-                        <td>Bet ID</td>
-                        <td>Nonce</td>
-                        <td>Roll</td>
-                        <td>Target</td>
-                        <td>Range</td>
-                        <td>Amount</td>
-                        <td>Profit</td>
-                        <td>Jackpot Profit</td>
-                        <td><strong>Verified</strong></td>
-                    </tr>
-                    <tr v-for="roll in verifiedRolls">
-                        <td>{{roll.bet_id}}</td>
-                        <td>{{roll.nonce}}</td>
-                        <td>{{roll.roll}}</td>
-                        <td>{{roll.target}}</td>
-                        <td>{{roll.range}}</td>
-                        <td>{{roll.amount}}</td>
-                        <td>{{roll.profit}}</td>
-                        <td>{{roll.jackpot_profit}}</td>
-                        <td><strong>{{roll.verified}}</strong></td>
-                    </tr>
-                </table>
+                <pre v-if="allInfoPresent()">Result: {{result()}}</pre>
             </div>
         </div>
-        <p class="donation">Donations: <a href="bitcoin:1KW1yj5JJukm3JFS7H4nNyt5zQyzcKz9La?label=YOLOdice%20Verifier%20Donation">1KW1yj5JJukm3JFS7H4nNyt5zQyzcKz9La</a> &bull; <a href="https://github.com/RGBKey/yolodice-verifier">GitHub Source</a></p>
+        <p class="donation">Donations: <a href="bitcoin:1L7jCdX32cRSLankubtGNWBedBn6M1NofJ?label=bustadice%20Verifier%20Donation">1L7jCdX32cRSLankubtGNWBedBn6M1NofJ</a> &bull; <a href="https://github.com/RGBKey/yolodice-verifier">GitHub Source</a></p>
         <p class="attrib">This project uses the third-party libraries <a href="https://vuejs.org/">Vue.js</a> and <a href="https://github.com/digitalbazaar/forge">Forge</a></p>
         <script src="main.js"></script>
     </body>
